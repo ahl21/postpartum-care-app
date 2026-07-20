@@ -10,176 +10,298 @@ from PIL import Image
 # ================== تنظیمات صفحه ==================
 st.set_page_config(
     page_title="مراقبت پس از زایمان",
-    page_icon="🤱",
+    page_icon="🌸",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# ================== استایل ==================
+# ================== استایل جدید ==================
 st.markdown("""
 <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;700;900&display=swap');
+    
+    * {
+        font-family: 'Vazirmatn', Tahoma, sans-serif;
+    }
+    
     .stApp {
-        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        background: linear-gradient(145deg, #f8f9fc 0%, #e9ecef 100%);
     }
+    
+    .main-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
     .glass-card {
-        background: rgba(255, 255, 255, 0.05);
-        backdrop-filter: blur(15px);
-        border-radius: 30px;
-        padding: 30px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        background: rgba(255, 255, 255, 0.6);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-radius: 40px;
+        padding: 25px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.05), inset 0 0 80px rgba(255,255,255,0.3);
         margin-bottom: 20px;
+        transition: all 0.3s ease;
     }
+    
+    .glass-card:hover {
+        box-shadow: 0 25px 60px rgba(0,0,0,0.08);
+    }
+    
     .main-title {
         text-align: center;
-        font-size: 3rem;
-        font-weight: 800;
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 50%, #4facfe 100%);
+        font-size: 3.2rem;
+        font-weight: 900;
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 50%, #b2bec3 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
+        text-shadow: none;
+        letter-spacing: 2px;
+        margin-bottom: 5px;
     }
+    
     .sub-title {
         text-align: center;
-        color: rgba(255,255,255,0.7);
+        color: #636e72;
         font-size: 1.1rem;
-        margin-bottom: 30px;
+        font-weight: 300;
+        margin-bottom: 20px;
+        letter-spacing: 1px;
     }
+    
     .warning-box {
-        background: rgba(255, 59, 48, 0.1);
-        border: 1px solid rgba(255, 59, 48, 0.3);
-        border-radius: 15px;
-        padding: 15px;
-        color: #ff3b30;
+        background: rgba(255, 215, 0, 0.08);
+        border: 1px solid rgba(255, 215, 0, 0.15);
+        border-radius: 20px;
+        padding: 12px 20px;
+        color: #b7950b;
         text-align: center;
-        margin: 10px 0;
+        font-size: 0.9rem;
+        backdrop-filter: blur(10px);
     }
+    
     .role-selector {
         display: flex;
         justify-content: center;
         gap: 15px;
-        margin: 20px 0;
+        margin: 15px 0;
+        flex-wrap: wrap;
     }
+    
     .role-btn {
-        background: rgba(255,255,255,0.1);
-        border: 2px solid rgba(255,255,255,0.2);
-        border-radius: 20px;
+        background: rgba(255,255,255,0.5);
+        border: 1.5px solid rgba(0,0,0,0.05);
+        border-radius: 30px;
         padding: 12px 30px;
-        color: white;
+        color: #2d3436;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
+        text-align: center;
+        min-width: 120px;
+        backdrop-filter: blur(5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
     }
+    
     .role-btn:hover {
-        background: rgba(255,255,255,0.2);
+        background: rgba(255,255,255,0.8);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
+    
     .role-btn.active {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        border-color: #f5576c;
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+        color: white;
+        border-color: #2d3436;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
+    
     .code-box {
-        background: #2d3436;
-        color: #dfe6e9;
-        padding: 15px 20px;
-        border-radius: 15px;
-        font-family: 'Courier New', monospace;
-        font-size: 18px;
+        background: rgba(0,0,0,0.03);
+        color: #2d3436;
+        padding: 12px 20px;
+        border-radius: 20px;
+        font-family: 'Vazirmatn', monospace;
+        font-size: 1.1rem;
         text-align: center;
         margin: 10px 0;
+        border: 1px solid rgba(0,0,0,0.05);
+        backdrop-filter: blur(5px);
     }
+    
     .doctor-card {
-        background: rgba(255,255,255,0.05);
-        border-radius: 15px;
-        padding: 20px;
-        margin: 10px 0;
-        border-left: 4px solid #f5576c;
-    }
-    .chat-container {
-        background: rgba(255,255,255,0.05);
+        background: rgba(255,255,255,0.5);
+        backdrop-filter: blur(10px);
         border-radius: 20px;
-        padding: 20px;
-        max-height: 400px;
-        overflow-y: auto;
-        border: 1px solid rgba(255,255,255,0.1);
+        padding: 15px 20px;
+        margin: 10px 0;
+        border-left: 4px solid #636e72;
+        transition: all 0.3s ease;
     }
+    
+    .doctor-card:hover {
+        background: rgba(255,255,255,0.8);
+        transform: translateX(5px);
+    }
+    
+    .doctor-card h3 {
+        color: #2d3436;
+        margin: 0 0 5px 0;
+        font-weight: 700;
+    }
+    
+    .doctor-card p {
+        color: #636e72;
+        margin: 3px 0;
+        font-weight: 300;
+    }
+    
+    .chat-container {
+        background: rgba(0,0,0,0.02);
+        border-radius: 25px;
+        padding: 15px;
+        max-height: 350px;
+        overflow-y: auto;
+        border: 1px solid rgba(0,0,0,0.03);
+    }
+    
     .message-bubble {
-        background: rgba(255,255,255,0.1);
-        border-radius: 15px;
-        padding: 12px;
+        background: rgba(255,255,255,0.6);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 12px 18px;
         margin: 8px 0;
         max-width: 80%;
-        color: white;
+        color: #2d3436;
+        border: 1px solid rgba(255,255,255,0.3);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.02);
     }
+    
     .message-bubble.sent {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+        color: white;
         margin-left: auto;
+        border: none;
     }
+    
     .message-bubble.received {
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.8);
         margin-right: auto;
+        border: 1px solid rgba(0,0,0,0.03);
     }
+    
     .message-bubble .time {
-        font-size: 0.7rem;
-        opacity: 0.7;
+        font-size: 0.6rem;
+        opacity: 0.5;
+        margin-top: 5px;
+        font-weight: 300;
+    }
+    
+    .message-bubble .expiry-badge {
+        background: rgba(255, 215, 0, 0.1);
+        border: 1px solid rgba(255, 215, 0, 0.1);
+        border-radius: 10px;
+        padding: 2px 10px;
+        font-size: 0.6rem;
+        color: #b7950b;
+        display: inline-block;
         margin-top: 5px;
     }
-    .message-bubble .image-container img {
-        max-width: 200px;
-        border-radius: 10px;
-        margin-top: 10px;
-        border: 1px solid rgba(255,255,255,0.2);
-    }
-    .expiry-badge {
-        background: rgba(255, 59, 48, 0.2);
-        border: 1px solid rgba(255, 59, 48, 0.3);
-        border-radius: 10px;
-        padding: 4px 12px;
-        font-size: 0.7rem;
-        color: #ff3b30;
-    }
+    
     .input-area {
-        background: rgba(255,255,255,0.05);
-        border-radius: 20px;
-        padding: 10px;
+        background: rgba(255,255,255,0.5);
+        backdrop-filter: blur(10px);
+        border-radius: 25px;
+        padding: 10px 15px;
         margin-top: 15px;
         display: flex;
         gap: 10px;
         align-items: center;
         flex-wrap: wrap;
+        border: 1px solid rgba(255,255,255,0.3);
     }
+    
     .input-area input, .input-area textarea {
         flex: 1;
-        background: rgba(255,255,255,0.1);
-        border: 1px solid rgba(255,255,255,0.2);
-        border-radius: 15px;
-        padding: 12px 20px;
-        color: white;
-        font-size: 1rem;
-        min-width: 200px;
+        background: rgba(255,255,255,0.7);
+        border: 1px solid rgba(0,0,0,0.03);
+        border-radius: 20px;
+        padding: 10px 15px;
+        color: #2d3436;
+        font-size: 0.95rem;
+        min-width: 150px;
+        font-family: 'Vazirmatn', sans-serif;
     }
+    
     .input-area input::placeholder, .input-area textarea::placeholder {
-        color: rgba(255,255,255,0.5);
+        color: #b2bec3;
     }
+    
     .input-area button {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
         border: none;
-        border-radius: 15px;
-        padding: 12px 25px;
+        border-radius: 20px;
+        padding: 10px 25px;
         color: white;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.3s ease;
+        font-family: 'Vazirmatn', sans-serif;
     }
+    
     .input-area button:hover {
-        transform: scale(1.05);
+        transform: scale(1.02);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
     }
+    
     .stButton > button {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%) !important;
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%) !important;
         color: white !important;
         border: none !important;
         border-radius: 30px !important;
-        padding: 12px 30px !important;
+        padding: 10px 25px !important;
         font-weight: 600 !important;
         width: 100%;
+        font-family: 'Vazirmatn', sans-serif !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton > button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05) !important;
+    }
+    
+    .footer {
+        text-align: center;
+        color: #b2bec3;
+        font-size: 0.9rem;
+        margin-top: 40px;
+        padding: 20px;
+        border-top: 1px solid rgba(0,0,0,0.02);
+        font-weight: 300;
+        letter-spacing: 1px;
+        direction: rtl;
+    }
+    
+    .footer .highlight {
+        background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+    
+    ::-webkit-scrollbar {
+        width: 6px;
+    }
+    ::-webkit-scrollbar-track {
+        background: rgba(0,0,0,0.02);
+        border-radius: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+        background: #b2bec3;
+        border-radius: 10px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -267,6 +389,7 @@ ADMIN_PASSWORD = "ahlat..mm666"
 DOCTOR_GENERAL_CODE = "752*36+9"
 
 # ================== عنوان ==================
+st.markdown('<div class="main-container">', unsafe_allow_html=True)
 st.markdown('<p class="main-title">🌸 مراقبت پس از زایمان</p>', unsafe_allow_html=True)
 st.markdown('<p class="sub-title">💜 همراه شما در دوران پس از زایمان</p>', unsafe_allow_html=True)
 
@@ -295,15 +418,15 @@ with col3:
         st.rerun()
 
 st.markdown('</div>', unsafe_allow_html=True)
-st.markdown('</div>', unsafe_allow_html=True)
 
-# ================== هشدار امنیتی ==================
+# ================== هشدار ==================
 st.markdown("""
 <div class="warning-box">
     🔒 <strong>هشدار امنیتی:</strong> برای ورود به هر بخش، به کد اختصاصی خود نیاز دارید. 
-    کد خود را محرمانه نگه دارید و در اختیار دیگران قرار ندهید.
+    کد خود را محرمانه نگه دارید.
 </div>
 """, unsafe_allow_html=True)
+st.markdown('</div>', unsafe_allow_html=True)
 
 # ================== پنل مادر ==================
 if st.session_state.get("role") == "مادر":
@@ -311,13 +434,7 @@ if st.session_state.get("role") == "مادر":
     st.subheader("👩 پنل مادر")
     
     if not st.session_state.get("logged_in"):
-        st.markdown("""
-        <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 15px; padding: 15px; color: #ffc107; text-align: center;">
-            ⚠️ برای ورود به پنل مادر، لطفاً کد اختصاصی خود را وارد کنید. 
-            اگر کد ندارید، ابتدا در بخش "ثبت‌نام" ثبت‌نام کنید.
-        </div>
-        """, unsafe_allow_html=True)
-        
+        st.info("⚠️ برای ورود، کد اختصاصی خود را وارد کنید. اگر کد ندارید، ثبت‌نام کنید.")
         kod = st.text_input("کد خود را وارد کنید:", type="password")
         if st.button("ورود"):
             found = None
@@ -328,10 +445,10 @@ if st.session_state.get("role") == "مادر":
             if found:
                 st.session_state.mother = found
                 st.session_state.logged_in = True
-                st.success("✅ ورود موفق! خوش آمدید.")
+                st.success("✅ ورود موفق!")
                 st.rerun()
             else:
-                st.error("❌ کد نامعتبر است! لطفاً ابتدا ثبت‌نام کنید.")
+                st.error("❌ کد نامعتبر است!")
         
         st.divider()
         st.subheader("📝 ثبت‌نام مادر جدید")
@@ -345,17 +462,14 @@ if st.session_state.get("role") == "مادر":
                 save_data(data)
                 st.success("✅ ثبت‌نام موفق!")
                 st.markdown(f'<div class="code-box">کد شما: {new_code}</div>', unsafe_allow_html=True)
-                st.warning("⚠️ این کد را ذخیره کنید. برای هر بار ورود به آن نیاز دارید.")
+                st.warning("⚠️ این کد را ذخیره کنید.")
     else:
         mother = st.session_state.mother
         st.success(f"👋 خوش آمدید، {mother['name']}!")
-        st.info("📋 برای مشاهده پیام‌ها و ارسال پیام، از بخش زیر استفاده کنید.")
         
-        # انتخاب پزشک
         doctor_codes = [doc["code"] for doc in doctor_list]
         target_doctor = st.selectbox("پزشک مورد نظر:", doctor_codes)
         
-        # چت
         chat_key = f"chat_{target_doctor}"
         if chat_key not in mother.get("chats", {}):
             if "chats" not in mother:
@@ -377,11 +491,9 @@ if st.session_state.get("role") == "مادر":
                 st.image(base64.b64decode(msg["image"]), caption="عکس ارسالی")
         st.markdown('</div>', unsafe_allow_html=True)
         
-        # ارسال پیام
         st.markdown('<div class="input-area">', unsafe_allow_html=True)
         new_msg = st.text_input("پیام خود را بنویسید:", key="mother_msg", placeholder="متن پیام...")
         uploaded_file = st.file_uploader("انتخاب عکس", type=["jpg", "jpeg", "png"], key="mother_photo")
-        
         if st.button("ارسال پیام"):
             if new_msg or uploaded_file:
                 msg_data = {
@@ -416,13 +528,7 @@ elif st.session_state.get("role") == "پزشک":
     st.subheader("👨‍⚕️ پنل پزشک")
     
     if not st.session_state.get("logged_in"):
-        st.markdown("""
-        <div style="background: rgba(255, 193, 7, 0.1); border: 1px solid rgba(255, 193, 7, 0.3); border-radius: 15px; padding: 15px; color: #ffc107; text-align: center;">
-            ⚠️ برای ورود به پنل پزشک، ابتدا کد عمومی و سپس کد اختصاصی خود را وارد کنید.
-            این کدها از طرف مدیریت در اختیار شما قرار گرفته است.
-        </div>
-        """, unsafe_allow_html=True)
-        
+        st.info("⚠️ ابتدا کد عمومی و سپس کد اختصاصی خود را وارد کنید.")
         general_code = st.text_input("کد عمومی پزشکان را وارد کنید:", type="password")
         if general_code == DOCTOR_GENERAL_CODE:
             st.success("✅ کد عمومی صحیح است!")
@@ -436,7 +542,7 @@ elif st.session_state.get("role") == "پزشک":
                 if found:
                     st.session_state.doctor = found
                     st.session_state.logged_in = True
-                    st.success("✅ ورود موفق! خوش آمدید.")
+                    st.success("✅ ورود موفق!")
                     st.rerun()
                 else:
                     st.error("❌ کد اختصاصی نامعتبر است!")
@@ -518,18 +624,4 @@ else:
                     <p>🏥 {doc['hospital']}</p>
                     <p>📋 {doc['type']}</p>
                     <p>🔑 کد: <code>{doc['code']}</code></p>
-                </div>
-                """, unsafe_allow_html=True)
-    else:
-        if admin_pass:
-            st.error("❌ رمز اشتباه است!")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
-
-# ================== فوتر ==================
-st.markdown("""
-<div style="text-align: center; color: rgba(255,255,255,0.2); font-size: 0.8rem; margin-top: 40px; padding: 20px;">
-    💜 این برنامه بر اساس نظریه مطابقت طراحی شده است<br>
-    © ۲۰۲۶ - تمامی حقوق محفوظ است
-</div>
-""", unsafe_allow_html=True)
+                </
