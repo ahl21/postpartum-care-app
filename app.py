@@ -15,9 +15,7 @@ st.markdown("""
     .stApp { background: #f0f2f6; }
     .main-title { text-align: center; font-size: 3rem; font-weight: bold; color: #2d3436; }
     .glass-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); margin-bottom: 20px; }
-    .role-btn { background: #e0e0e0; border-radius: 30px; padding: 10px 20px; text-align: center; cursor: pointer; }
-    .role-btn:hover { background: #d0d0d0; }
-    .code-box { background: #f8f9fa; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #ddd; }
+    .code-box { background: #f8f9fa; padding: 10px; border-radius: 10px; text-align: center; border: 1px solid #ddd; font-family: monospace; font-size: 1.2rem; }
     .doctor-card { background: #f8f9fa; padding: 15px; border-radius: 15px; margin: 10px 0; border-left: 4px solid #2d3436; }
     .chat-container { background: #f8f9fa; border-radius: 15px; padding: 15px; max-height: 350px; overflow-y: auto; }
     .message-bubble { background: white; border-radius: 15px; padding: 10px 15px; margin: 8px 0; max-width: 80%; }
@@ -69,13 +67,8 @@ def ramz_baz(ramz):
     except:
         return "❗"
 
-def sakht_kod():
-    kod = ""
-    for _ in range(4):
-        adad = random.randint(100, 999)
-        b, u = motabeghat(adad)
-        kod += str(b) + "." + str(u) + " "
-    return kod.strip()
+def sakht_kod_madar():
+    return f"M-{random.randint(10000, 99999)}"
 
 def tarikh():
     return datetime.date.today() + datetime.timedelta(days=60)
@@ -103,8 +96,10 @@ def save_data(data):
 data = load_data()
 doctor_list = data["doctors"]
 madar_list = data["mothers"]
+
 ADMIN_PASSWORD = "ahlat..mm666"
 DOCTOR_GENERAL_CODE = "752*36+9"
+MOTHER_GENERAL_CODE = "MOTHER2024"
 
 st.markdown('<p class="main-title">🌸 مراقبت پس از زایمان</p>', unsafe_allow_html=True)
 
@@ -129,35 +124,45 @@ if st.session_state.get("role") == "مادر":
     with st.container():
         st.subheader("👩 پنل مادر")
         if not st.session_state.get("logged_in"):
-            kod = st.text_input("کد خود را وارد کنید:", type="password")
-            if st.button("ورود"):
-                found = None
-                for m in madar_list:
-                    if m["code"] == kod:
-                        found = m
-                        break
-                if found:
-                    st.session_state.mother = found
-                    st.session_state.logged_in = True
-                    st.success("✅ ورود موفق!")
-                    st.rerun()
-                else:
-                    st.error("❌ کد نامعتبر است!")
+            st.info("⚠️ ابتدا کد عمومی مادران و سپس کد اختصاصی خود را وارد کنید.")
+            general_code = st.text_input("کد عمومی مادران را وارد کنید:", type="password")
+            if general_code == MOTHER_GENERAL_CODE:
+                st.success("✅ کد عمومی صحیح است!")
+                mother_code = st.text_input("کد اختصاصی خود را وارد کنید:", type="password")
+                if st.button("ورود به پنل"):
+                    found = None
+                    for m in madar_list:
+                        if m["code"] == mother_code:
+                            found = m
+                            break
+                    if found:
+                        st.session_state.mother = found
+                        st.session_state.logged_in = True
+                        st.success("✅ ورود موفق!")
+                        st.rerun()
+                    else:
+                        st.error("❌ کد اختصاصی نامعتبر است!")
+            else:
+                if general_code:
+                    st.error("❌ کد عمومی اشتباه است!")
             st.divider()
             st.subheader("📝 ثبت‌نام مادر جدید")
             name = st.text_input("نام مادر")
             if st.button("ثبت‌نام"):
                 if name:
-                    new_code = sakht_kod()
+                    new_code = sakht_kod_madar()
                     new_mother = {"name": name, "code": new_code, "chats": {}}
                     madar_list.append(new_mother)
                     data["mothers"] = madar_list
                     save_data(data)
                     st.success("✅ ثبت‌نام موفق!")
-                    st.markdown(f'<div class="code-box">کد شما: {new_code}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="code-box">کد عمومی: {MOTHER_GENERAL_CODE}</div>', unsafe_allow_html=True)
+                    st.markdown(f'<div class="code-box">کد اختصاصی شما: {new_code}</div>', unsafe_allow_html=True)
+                    st.warning("⚠️ این کدها را ذخیره کنید. برای ورود به هر دو نیاز دارید.")
         else:
             mother = st.session_state.mother
             st.success(f"👋 خوش آمدید، {mother['name']}!")
+            st.info(f"🔑 کد اختصاصی شما: {mother['code']}")
             doctor_codes = [doc["code"] for doc in doctor_list]
             target_doctor = st.selectbox("پزشک مورد نظر:", doctor_codes)
             chat_key = f"chat_{target_doctor}"
