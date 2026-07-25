@@ -3,185 +3,105 @@ import datetime
 import random
 import json
 import os
-import base64
-import io
-from PIL import Image
+import re
 
-st.set_page_config(page_title="مراقبت پس از زایمان", page_icon="🌸", layout="wide")
+st.set_page_config(page_title="حمایت از مادران", page_icon="🌸", layout="wide")
 
-BACKGROUND_IMAGE_URL = "https://cdn.pixabay.com/photo/2020/05/30/19/29/mother-5240383_960_720.jpg"
+# ================== تصویر صفحه اصلی ==================
+st.image("https://cdn.pixabay.com/photo/2020/05/30/19/29/mother-5240383_960_720.jpg", width=300)
 
-st.markdown(f"""
-<style>
-    * {{ font-family: Tahoma, sans-serif; }}
-    .stApp {{
-        background: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.85)),
-                    url('{BACKGROUND_IMAGE_URL}');
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-    }}
-    .main-title {{
-        text-align: center;
-        font-size: 3rem;
-        font-weight: bold;
-        color: #4a148c;
-        text-shadow: 2px 2px 8px rgba(255,255,255,0.8);
-        background: rgba(255,255,255,0.3);
-        padding: 15px;
-        border-radius: 20px;
-        backdrop-filter: blur(5px);
-        display: inline-block;
-        margin: 0 auto;
-    }}
-    .glass-card {{
-        background: rgba(255,255,255,0.75);
-        backdrop-filter: blur(15px);
-        -webkit-backdrop-filter: blur(15px);
-        border-radius: 30px;
-        padding: 25px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        margin-bottom: 20px;
-        border: 1px solid rgba(255,255,255,0.3);
-        transition: all 0.3s ease;
-    }}
-    .glass-card:hover {{
-        box-shadow: 0 12px 48px rgba(0,0,0,0.18);
-        transform: translateY(-2px);
-    }}
-    .code-box {{
-        background: rgba(255,255,255,0.6);
-        padding: 12px 20px;
-        border-radius: 15px;
-        text-align: center;
-        border: 2px solid #f06292;
-        font-family: monospace;
-        font-size: 1.2rem;
-        color: #880e4f;
-        backdrop-filter: blur(5px);
-    }}
-    .doctor-card {{
-        background: rgba(255,255,255,0.6);
-        backdrop-filter: blur(10px);
-        border-radius: 20px;
-        padding: 15px 20px;
-        margin: 10px 0;
-        border-left: 4px solid #f06292;
-        transition: all 0.3s ease;
-    }}
-    .doctor-card:hover {{
-        background: rgba(255,255,255,0.8);
-        transform: translateX(5px);
-    }}
-    .chat-container {{
-        background: rgba(255,255,255,0.4);
-        border-radius: 20px;
-        padding: 15px;
-        max-height: 350px;
-        overflow-y: auto;
-        border: 1px solid rgba(255,255,255,0.3);
-        backdrop-filter: blur(5px);
-    }}
-    .message-bubble {{
-        background: rgba(255,255,255,0.7);
-        border-radius: 15px;
-        padding: 10px 15px;
-        margin: 8px 0;
-        max-width: 80%;
-        color: #4a148c;
-        backdrop-filter: blur(5px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-    }}
-    .message-bubble.sent {{
-        background: #f06292;
-        color: white;
-        margin-left: auto;
-    }}
-    .message-bubble.received {{
-        background: rgba(255,255,255,0.8);
-        margin-right: auto;
-        border: 1px solid #f8bbd0;
-    }}
-    .footer {{
-        text-align: center;
-        color: #4a148c;
-        margin-top: 40px;
-        padding: 20px;
-        border-top: 2px solid rgba(244, 143, 177, 0.3);
-        font-weight: 500;
-        background: rgba(255,255,255,0.3);
-        backdrop-filter: blur(5px);
-        border-radius: 20px;
-    }}
-    .footer .highlight {{
-        color: #c2185b;
-        font-weight: 700;
-    }}
-    .stButton > button {{
-        background: linear-gradient(145deg, #f06292, #ec407a) !important;
-        color: white !important;
-        border: none !important;
-        border-radius: 30px !important;
-        padding: 10px 25px !important;
-        font-weight: 600 !important;
-        width: 100%;
-        transition: all 0.3s ease !important;
-        box-shadow: 0 4px 15px rgba(236, 64, 122, 0.3);
-    }}
-    .stButton > button:hover {{
-        transform: scale(1.02);
-        box-shadow: 0 8px 25px rgba(236, 64, 122, 0.4);
-    }}
-</style>
-""", unsafe_allow_html=True)
+st.markdown('<p class="main-title">🌸 حمایت از مادران</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-title">💜 همراه شما در دوران پس از زایمان</p>', unsafe_allow_html=True)
 
-SECRET_KEY = 137
+# ================== جدول کدهای اختصاصی حروف فارسی ==================
+PERSIAN_ALPHABET = {
+    "ا": {"id": "A", "signature": (1, 2)},
+    "ب": {"id": "B", "signature": (2, 1)},
+    "پ": {"id": "P", "signature": (1, 2)},
+    "ت": {"id": "T", "signature": (3, 1)},
+    "ث": {"id": "TH", "signature": (1, 2)},
+    "ج": {"id": "J", "signature": (2, 2)},
+    "چ": {"id": "CH", "signature": (1, 2)},
+    "ح": {"id": "H", "signature": (3, 1)},
+    "خ": {"id": "KH", "signature": (2, 1)},
+    "د": {"id": "D", "signature": (2, 1)},
+    "ذ": {"id": "Z", "signature": (1, 2)},
+    "ر": {"id": "R", "signature": (2, 1)},
+    "ز": {"id": "ZH", "signature": (2, 2)},
+    "ژ": {"id": "JZ", "signature": (2, 1)},
+    "س": {"id": "S", "signature": (1, 3)},
+    "ش": {"id": "SH", "signature": (2, 1)},
+    "ص": {"id": "SAD", "signature": (2, 2)},
+    "ض": {"id": "ZAD", "signature": (3, 1)},
+    "ط": {"id": "TA", "signature": (1, 3)},
+    "ظ": {"id": "ZA", "signature": (2, 1)},
+    "ع": {"id": "EIN", "signature": (1, 2)},
+    "غ": {"id": "GHEIN", "signature": (3, 1)},
+    "ف": {"id": "F", "signature": (1, 2)},
+    "ق": {"id": "GH", "signature": (2, 2)},
+    "ک": {"id": "K", "signature": (1, 2)},
+    "گ": {"id": "G", "signature": (3, 1)},
+    "ل": {"id": "L", "signature": (2, 1)},
+    "م": {"id": "M", "signature": (2, 2)},
+    "ن": {"id": "N", "signature": (1, 2)},
+    "و": {"id": "V", "signature": (2, 1)},
+    "ه": {"id": "HE", "signature": (2, 2)},
+    "ی": {"id": "Y", "signature": (2, 1)}
+}
 
-def motabeghat(adad):
-    b = 0
-    u = 0
-    if adad % 2 == 0:
-        b += 1
-    else:
-        u += 1
-    s = sum(int(d) for d in str(adad))
-    if s % 2 == 0:
-        b += 1
-    else:
-        u += 1
-    for i in range(1, int(s**0.5) + 1):
-        if s % i == 0:
-            jam = i + s // i
-            if jam % 2 == 0:
-                b += 1
-            else:
-                u += 1
-    return b, u
-
+# ================== توابع رمزنگاری بر اساس جدول اختصاصی ==================
 def ramz_kon(harf):
-    adad = ord(harf) + SECRET_KEY
-    b, u = motabeghat(adad)
-    return str(b) + "." + str(u)
+    """تبدیل حرف فارسی به کد اختصاصی (مثلاً ا → A1,2)"""
+    if harf in PERSIAN_ALPHABET:
+        info = PERSIAN_ALPHABET[harf]
+        harf_id = info["id"]
+        b, u = info["signature"]
+        # انتخاب جداکننده بر اساس مقادیر b و u
+        if b > u:
+            sep = "."
+        elif b < u:
+            sep = ","
+        else:
+            sep = "ـ"
+        return f"{harf_id}{b}{sep}{u}"
+    return harf
 
 def ramz_baz(ramz):
+    """تبدیل کد اختصاصی به حرف فارسی (مثلاً A1,2 → ا)"""
     try:
-        b_str, u_str = ramz.split(".")
-        b = int(b_str)
-        u = int(u_str)
-        for i in range(32, 127):
-            bb, uu = motabeghat(i)
-            if bb == b and uu == u:
-                return chr(i - SECRET_KEY)
+        # الگوی کد: حرف انگلیسی + عدد + جداکننده + عدد
+        match = re.match(r"([A-Z]+)(\d+)([.,ـ])(\d+)", ramz)
+        if match:
+            harf_id = match.group(1)
+            b = int(match.group(2))
+            u = int(match.group(4))
+            for harf, info in PERSIAN_ALPHABET.items():
+                if info["id"] == harf_id and info["signature"] == (b, u):
+                    return harf
         return "؟"
     except:
         return "❗"
 
-def sakht_kod_madar():
-    return f"M-{random.randint(10000, 99999)}"
+def encode_message(msg):
+    """تبدیل پیام کامل به کدهای اختصاصی"""
+    code_parts = []
+    for char in msg:
+        if char in PERSIAN_ALPHABET:
+            code_parts.append(ramz_kon(char))
+        else:
+            code_parts.append(char)
+    return " ".join(code_parts)
 
-def tarikh():
-    return datetime.date.today() + datetime.timedelta(days=60)
+def decode_message(code):
+    """تبدیل کدهای اختصاصی به پیام اصلی"""
+    parts = code.split()
+    message = ""
+    for part in parts:
+        decoded = ramz_baz(part)
+        message += decoded if decoded != "?" else part
+    return message
 
+# ================== ذخیره‌سازی با JSON ==================
 DATA_FILE = "data.json"
 
 def load_data():
@@ -210,8 +130,46 @@ ADMIN_PASSWORD = "ahlat..mm666"
 DOCTOR_GENERAL_CODE = "752*36+9"
 MOTHER_GENERAL_CODE = "MOTHER2024"
 
-st.markdown('<p class="main-title">🌸 مراقبت پس از زایمان</p>', unsafe_allow_html=True)
+def sakht_kod_madar():
+    return f"M-{random.randint(10000, 99999)}"
 
+def tarikh():
+    return datetime.date.today() + datetime.timedelta(days=60)
+
+# ================== استایل ==================
+st.markdown("""
+<style>
+    .main-title {
+        text-align: center;
+        font-size: 3rem;
+        font-weight: bold;
+        color: #4a148c;
+    }
+    .sub-title {
+        text-align: center;
+        font-size: 1.2rem;
+        color: #636e72;
+    }
+    .glass-card {
+        background: rgba(255,255,255,0.8);
+        border-radius: 30px;
+        padding: 25px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .code-box {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 15px;
+        text-align: center;
+        border: 2px solid #f06292;
+        font-family: monospace;
+        font-size: 1.2rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# ================== منو ==================
 col1, col2, col3 = st.columns(3)
 with col1:
     if st.button("👩 مادر", use_container_width=True):
@@ -274,25 +232,20 @@ if st.session_state.get("role") == "مادر":
             st.success(f"👋 خوش آمدید، {mother['name']}!")
             st.info(f"🔑 کد اختصاصی شما: {mother['code']}")
             
-            st.subheader("🔐 رمزنگاری پیام")
+            st.subheader("🔐 رمزنگاری پیام (بر اساس کدهای اختصاصی)")
             tab1, tab2 = st.tabs(["✉️ تبدیل پیام به کد", "🔓 تبدیل کد به پیام"])
             with tab1:
-                msg = st.text_area("پیام خود را وارد کنید:")
+                msg = st.text_area("پیام خود را وارد کنید (فارسی یا انگلیسی):")
                 if st.button("ساخت کد"):
                     if msg:
-                        code = ""
-                        for char in msg:
-                            code += ramz_kon(char) + " "
+                        code = encode_message(msg)
                         st.success("✅ کد شما ساخته شد!")
-                        st.markdown(f'<div class="code-box">{code.strip()}</div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="code-box">{code}</div>', unsafe_allow_html=True)
             with tab2:
                 code_input = st.text_input("کد دریافتی را وارد کنید:")
                 if st.button("رمزگشایی"):
                     if code_input:
-                        parts = code_input.split()
-                        message = ""
-                        for part in parts:
-                            message += ramz_baz(part)
+                        message = decode_message(code_input)
                         st.success("✅ پیام اصلی:")
                         st.markdown(f'<div class="code-box">{message}</div>', unsafe_allow_html=True)
             
@@ -361,25 +314,20 @@ elif st.session_state.get("role") == "پزشک":
             doctor = st.session_state.doctor
             st.success(f"👋 خوش آمدید، {doctor['name']}!")
             
-            st.subheader("🔐 رمزنگاری پیام")
+            st.subheader("🔐 رمزنگاری پیام (بر اساس کدهای اختصاصی)")
             tab1, tab2 = st.tabs(["✉️ تبدیل پیام به کد", "🔓 تبدیل کد به پیام"])
             with tab1:
-                msg = st.text_area("پیام خود را وارد کنید:")
+                msg = st.text_area("پیام خود را وارد کنید (فارسی یا انگلیسی):")
                 if st.button("ساخت کد"):
                     if msg:
-                        code = ""
-                        for char in msg:
-                            code += ramz_kon(char) + " "
+                        code = encode_message(msg)
                         st.success("✅ کد شما ساخته شد!")
-                        st.markdown(f'<div class="code-box">{code.strip()}</div>', unsafe_allow_html=True)
+                        st.markdown(f'<div class="code-box">{code}</div>', unsafe_allow_html=True)
             with tab2:
                 code_input = st.text_input("کد دریافتی را وارد کنید:")
                 if st.button("رمزگشایی"):
                     if code_input:
-                        parts = code_input.split()
-                        message = ""
-                        for part in parts:
-                            message += ramz_baz(part)
+                        message = decode_message(code_input)
                         st.success("✅ پیام اصلی:")
                         st.markdown(f'<div class="code-box">{message}</div>', unsafe_allow_html=True)
             
@@ -415,6 +363,24 @@ else:
         admin_pass = st.text_input("رمز مدیریت:", type="password")
         if admin_pass == ADMIN_PASSWORD:
             st.success("✅ دسترسی مدیریت فعال شد!")
+            
+            st.subheader("🖼️ تغییر تصویر پس‌زمینه")
+            new_image_url = st.text_input("لینک تصویر جدید را وارد کنید:")
+            if st.button("تغییر تصویر"):
+                if new_image_url:
+                    st.markdown(f"""
+                    <style>
+                        .stApp {{
+                            background: linear-gradient(rgba(255, 255, 255, 0.75), rgba(255, 255, 255, 0.85)),
+                                        url('{new_image_url}');
+                            background-size: cover;
+                            background-position: center;
+                            background-attachment: fixed;
+                        }}
+                    </style>
+                    """, unsafe_allow_html=True)
+                    st.success("✅ تصویر پس‌زمینه تغییر کرد!")
+            
             tab1, tab2, tab3 = st.tabs(["➕ افزودن پزشک", "❌ حذف پزشک", "👨‍⚕️ لیست پزشکان"])
             with tab1:
                 name = st.text_input("نام پزشک")
